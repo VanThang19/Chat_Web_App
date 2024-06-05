@@ -1,8 +1,9 @@
+// fileUploadRoutes.js
 const express = require('express');
-const fileUploadController = require('../Controller/fileUploadController');
-
 const router = express.Router();
+const upload = require('../Middleware/uploadMiddleware');
+const updateFileMiddleware = require('../middleware/updateFileMiddleware');
 
-router.post('/', fileUploadController.uploadFile);
+router.put('/upload/:id', upload.single('file'), updateFileMiddleware);
 
 module.exports = router;
