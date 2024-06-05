@@ -35,7 +35,6 @@ const sendMessage = expressAsyncHandler(async (req, res) => {
     try {
         var message = await Message.create(newMessage);
 
-        console.log(message);
         message = await message.populate("sender", "name pic");
         message = await message.populate("chat");
         message = await message.populate("reciever");

@@ -1,6 +1,5 @@
 const express = require('express');
 const http = require('http');
-const WebSocket = require('ws');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -8,6 +7,8 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const userRoutes = require('./Routes/userRoutes');
 const chatRoutes = require('./Routes/chatRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
+const fileUploadRoutes = require('./Routes/fileUploadRoutes');
+const socketio = require('socket.io');
 
 dotenv.config();
 
@@ -26,12 +27,12 @@ const connectDb = async () => {
 };
 connectDb();
 
-app.get('/', (req, res) => {
-    res.send('API is running 123224!');
-});
 app.use('/user', userRoutes);
+app.use('/upload', fileUploadRoutes);
 app.use('/chat', chatRoutes);
 app.use('/message', messageRoutes);
+
+
 
 // Error Handling middlewares
 app.use(notFound);
@@ -39,26 +40,23 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
 
-wss.on('connection', (ws) => {
-    console.log('New client connected');
+// Sử dụng socket.io
+const io = socketio(server);
 
-    ws.on('message', (message) => {
+io.on('connection', (socket) => {
+    console.log('Có thiết bị mới đã kết nối !');
+
+    socket.on('message', (message) => {
         // Broadcast the message to all clients
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
+        io.emit('message', message);
     });
 
-    ws.on('close', () => {
-        console.log('Client disconnected');
+    socket.on('disconnect', () => {
+        console.log('Client đã đăng xuất');
     });
 });
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
