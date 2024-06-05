@@ -56,6 +56,12 @@ io.on('connection', (socket) => {
         console.log('Client đã đăng xuất');
     });
 });
+// ... (các middleware và route khác)
+
+app.use((err, req, res, next) => {
+    console.error(err); // In ra lỗi để debug
+    res.status(500).json({ message: 'Internal Server Error' });
+});
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
